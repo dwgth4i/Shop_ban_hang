@@ -17,19 +17,6 @@ if (!isset($_SESSION["cart"])) {
 $cart = $_SESSION["cart"];
 
 
-$totalPrice = 0;
-
-
-if (!empty($cart)) {
-    foreach ($cart as $item) {
-        $sql = "SELECT * FROM product WHERE id = $item";
-        $result = $conn->query($sql);
-        if ($result->num_rows > 0) {
-            $row = $result->fetch_assoc();
-            $totalPrice += $row['price'];
-        }
-    }
-}
 ?>
 
 <!DOCTYPE html>
@@ -43,17 +30,34 @@ if (!empty($cart)) {
     <h2>Giỏ hàng của bạn</h2>
     <?php
     if (!empty($cart)) {
-        echo "<ul>";
-        foreach ($cart as $item) {
- 
-            $sql = "SELECT * FROM product WHERE id = $item";
-            $result = $conn->query($sql);
-            if ($result->num_rows > 0) {
-                $row = $result->fetch_assoc();
-                echo "<li>{$row['product_name']} - Giá: {$row['price']}$</li>";
+
+        $totalPrice = 0;
+    
+
+        $cartQuantity = array_count_values($cart);
+    
+
+        $itemIds = implode(",", array_keys($cartQuantity));
+    
+
+        $sql = "SELECT * FROM product WHERE id IN ($itemIds)";
+        $result = $conn->query($sql);
+    
+        if ($result->num_rows > 0) {
+            echo "<ul>";
+            while ($row = $result->fetch_assoc()) {
+
+                $productId = $row['id'];
+                $quantityInCart = $cartQuantity[$productId];
+
+                $productPrice = $row['price'] * $quantityInCart;
+                $totalPrice += $productPrice;
+    
+                echo "<li>{$row['product_name']} - Giá: {$row['price']}$ - Số lượng trong giỏ hàng: $quantityInCart</li>";
             }
+            echo "</ul>";
         }
-        echo "</ul>";
+        echo "<h3>Tổng tiền trong giỏ hàng: $totalPrice$</h3>";
     } else {
         echo "<p>Giỏ hàng của bạn hiện đang trống.</p>";
     }
