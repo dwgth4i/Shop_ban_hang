@@ -12,16 +12,25 @@ if (isset($_POST["username"]) && isset($_POST["password"]) && isset($_POST["emai
     $username = $_POST["username"];
     $password = $_POST["password"];
     $email = $_POST["email"];
-    $sql = "SELECT * FROM `users` WHERE name='$username'";
-    $result = $conn->query($sql);
+    $enc_password = md5($password);
+
+    $sql = "SELECT * FROM `users` WHERE username=?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
     if ($result->num_rows > 0) {
         echo "Có người dùng tên này rồi, tên khác đi bro!!";
     } else {
-        $sql = "INSERT INTO users(name,password,email) VALUE ('$username','$password','$email')";
-        $conn->query($sql);
+        $sql = "INSERT INTO users(username, password, email) VALUES (?, ?, ?)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("sss", $username, $enc_password, $email);
+        $stmt->execute();
         echo "Người dùng $username đã được add <3";
     }
 }
+
 
 ?>
 
