@@ -19,8 +19,8 @@ if ($result->num_rows > 0) {
         echo "giá: " . $row["price"] . "<br>";
         echo "<br>";
 
-        if ($pid === 1 || $pid === 2 || $pid === 3 || $pid === 4) {
-            echo "Xoá hộ bố mày cái";
+        if ($pid === 1) {
+            echo "Xoá hộ";
         } else {
             echo "<form action='delete_product.php' method='POST'>";
             echo "<input type='hidden' name='delete_product' value='$pid'>";
@@ -37,14 +37,16 @@ if (isset($_POST["delete_product"])) {
     if ($pid === 1 || $pid === 2 || $pid === 3 || $pid === 4) {
         echo "Sản phẩm này xịn lắm đừng xóa (っ◞‸◟ c)";
     } else {
-        $sql = "DELETE FROM `product` WHERE id = $pid";
-        $conn->query($sql);
-        echo "Đã xóa sản phẩm có ID: $pid";
-        header("Location: delete_product.php");
+        $sql = "DELETE FROM `product` WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $pid);
+        if ($stmt->execute()) {
+            echo "Đã xóa sản phẩm có ID: $pid";
+            header("Location: delete_product.php");
+            exit();
+        } else {
+            echo "Có lỗi xảy ra khi xóa sản phẩm. Vui lòng thử lại sau.";
+        }
     }
 }
 
-
-
-
-?>
