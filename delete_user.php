@@ -19,7 +19,7 @@ if ($result->num_rows > 0) {
         echo "<br>";
 
         if ($uid === 1) {
-            echo "Xoá hộ bố mày cái";
+            echo "Xoá hộ";
         } else {
             echo "<form action='delete_user.php' method='POST'>";
             echo "<input type='hidden' name='delete_user' value='$uid'>";
@@ -37,14 +37,24 @@ if (isset($_POST["delete_user"])) {
     $uid = intval($_POST["delete_user"]);
 
     if ($uid === 1) {
-        echo "Vkl đéo ai lại đi xóa admin ୧༼ಠ益ಠ༽୨";
+        echo "Vkl ai lại đi xóa admin ୧༼ಠ益ಠ༽୨";
     } else {
-        $sql = "DELETE FROM `users` WHERE id = $uid";
-        $conn->query($sql);
-        echo "Đã xóa user có ID: $uid";
-        header("Location: delete_user.php");
+
+        $sql = "DELETE FROM `users` WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+
+        $stmt->bind_param("i", $uid);
+
+        if ($stmt->execute()) {
+            echo "Đã xóa user có ID: $uid";
+            header("Location: delete_user.php");
+            exit();
+        } else {
+            echo "Có lỗi xảy ra khi xóa user. Vui lòng thử lại sau.";
+        }
     }
 }
+
 ?>
 
 
