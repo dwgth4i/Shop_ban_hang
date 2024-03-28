@@ -2,6 +2,7 @@
 session_start();
 
 require 'database.php';
+include 'checkout.php';
 
 if (!isset($_SESSION["username"])) {
     header("Location: index.php");
@@ -15,21 +16,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (!isset($_SESSION["cart"])) {
         $_SESSION["cart"] = array();
     }
-
     $cart = $_SESSION["cart"];
 
-    $totalPrice = 0;
-
-    if (!empty($cart)) {
-        foreach ($cart as $item) {
-            $sql = "SELECT * FROM product WHERE id = $item";
-            $result = $conn->query($sql);
-            if ($result->num_rows > 0) {
-                $row = $result->fetch_assoc();
-                $totalPrice += $row['price'];
-            }
-        }
-    }
 
     $sql = "INSERT INTO orders(name, address, phone_number, total_price) VALUES (?, ?, ?, ?)";
     
@@ -47,4 +35,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->close();
     $conn->close();
 }
-?>
+
