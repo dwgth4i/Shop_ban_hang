@@ -23,21 +23,29 @@ $cart = $_SESSION["cart"];
     <h1>Giỏ hàng của bạn</h1>
 
     <?php
-    if (!empty($cart)) {
-        echo "<ul>";
-        foreach ($cart as $item) {
-                $sql = "SELECT * FROM product WHERE id = $item";
-                $result = $conn->query($sql);
-                if ($result->num_rows > 0) {
-                    $row = $result->fetch_assoc();
-                    echo "<li>{$row['product_name']} - Giá: {$row['price']}$</li>";
+        if (!empty($cart)) {
+            $cartQuantity = array_count_values($cart);
+
+            $itemIds = implode(",", array_keys($cartQuantity));
+
+            $sql = "SELECT * FROM product WHERE id IN ($itemIds)";
+            $result = $conn->query($sql);
+
+            if ($result->num_rows > 0) {
+                echo "<ul>";
+                while ($row = $result->fetch_assoc()) {
+                    $productId = $row['id'];
+                    $quantityInCart = $cartQuantity[$productId];
+
+                    echo "<li>{$row['product_name']} - Giá: {$row['price']}$ - Số lượng trong giỏ hàng: $quantityInCart</li>";
                 }
+                echo "</ul>";
+            }
+        } else {
+            echo "<p>Giỏ hàng của bạn hiện đang trống.</p>";
         }
-        echo "</ul>";
-    } else {
-        echo "<p>Giỏ hàng của bạn hiện đang trống.</p>";
-    }
     ?>
+
 
     <p><a href="shopping.php">Tiếp tục mua sắm</a></p>
     <p><a href="checkout.php">Thanh toán</a></p>
