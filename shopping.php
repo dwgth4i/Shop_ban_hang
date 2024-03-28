@@ -1,8 +1,8 @@
 <?php
 require 'database.php';
-session_start(); // ???
+session_start();
 
-if (!isset($_SESSION["username"])) { // cache lưu file hay bộ nhớ???
+if (!isset($_SESSION["username"])) { 
     header("Location: index.php");
     exit;
 }
@@ -19,20 +19,29 @@ $cartQuantity = array_count_values($cart);
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Web bán hàng xịn vkl</title>
+    <title>Bucaccho</title>
 </head>
 <body>
-    <h1>Chào mừng <?php echo $_SESSION["username"]; ?> đến với web bán hàng xịn vkl.</h1>
+    <h1>Chào mừng <?php echo $_SESSION["username"]; ?> đến với web bán hàng bucaccho.</h1>
 
     <h2>Giỏ hàng của bạn</h2>
     <?php
     if (!empty($cart)) {
         echo "<ul>";
         foreach ($cartQuantity as $product_id => $quantity) {
-            $sql = "SELECT * FROM product WHERE id = $product_id";
-            $result = $conn->query($sql);
+            // Prepare the SELECT statement
+            $sql = "SELECT * FROM product WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+
+            $stmt->bind_param("i", $product_id);
+
+            $stmt->execute();
+
+            $result = $stmt->get_result();
+
             if ($result->num_rows > 0) {
-                $row = $result->fetch_assoc();
+
+                $row = $result->fetch_assoc();    
                 echo "<li>{$row['product_name']} - Giá: {$row['price']}$ - Số lượng: {$quantity}";
                 echo " <form action='shopping.php' method='POST'>";
                 echo "     <input type='hidden' name='product_id' value='$product_id'>";
@@ -86,11 +95,15 @@ $cartQuantity = array_count_values($cart);
         if (isset($_POST["add_to_cart"])) {
             $cart[] = $product_id;
             $_SESSION["cart"] = $cart;
+            header("Location: shopping.php");
+            exit;
         } elseif (isset($_POST["remove_from_cart"])) {
             $index = array_search($product_id, $cart);
             if ($index !== false) {
                 array_splice($cart, $index, 1);
                 $_SESSION["cart"] = $cart;
+                header("Location: shopping.php");
+                exit;
             }
         }
         $cartQuantity = array_count_values($cart);
