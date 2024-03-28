@@ -1,13 +1,22 @@
 <?php
 require 'database.php';
+include 'validation.php';
 session_start();
 
 if (isset($_POST["username"]) && isset($_POST["password"])) {
     $username = $_POST["username"];
     $password = $_POST["password"];
+    $enc_password = md5($password);
+    if (!validation($username,$password)) {
+        header("Location: youcantdoshit.php");
+        exit;
+    };
 
-    $sql = "SELECT * FROM users WHERE name = '$username' AND password = '$password'";
-    $result = $conn->query($sql);
+    $sql = "SELECT username,password FROM users WHERE username =? AND password =?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ss", $username, $enc_password);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
     if ($result->num_rows == 1) {
             $row = $result->fetch_assoc();
