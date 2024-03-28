@@ -13,7 +13,7 @@ if (!isset($_SESSION["admin"])) {
     <title>Admin Panel</title>
 </head>
 <body>
-    <h1>Chào mừng Admin!</h1>
+    <h1>Admin Panel</h1>
     
     <h2>Chức năng của chúa!!</h2>
     <ul>
